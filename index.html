@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canadian Bank Tool</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    padding: 20px;
+    text-align: center;
+}
+
+.container {
+    max-width: 400px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+input, select, button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+.result {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.error {
+    color: red;
+}
+
+.success {
+    color: green;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Canadian Bank Tool</h2>
+
+    <select id="institution">
+        <option value="001">001 - BMO</option>
+        <option value="002">002 - Scotiabank</option>
+        <option value="003">003 - RBC</option>
+        <option value="004">004 - TD</option>
+        <option value="614">614 - Tangerine</option>
+    </select>
+
+    <input type="text" id="transit" placeholder="Transit Number (5 digits)">
+    <input type="text" id="account" placeholder="Account Number">
+
+    <button onclick="generate()">Generate</button>
+    <button onclick="validate()">Validate</button>
+
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+
+// Validation rules (simplified)
+const rules = {
+    "001": { account: /^[0-9]{7}$/ },
+    "002": { account: [/^[0-9]{7}$/, /^[0-9]{12}$/] },
+    "003": { account: /^[0-9]{7}$/ },
+    "004": { account: /^[0-9]{7}$/ },
+    "614": { account: /^[0-9]{10}$/ }
+};
+
+function randomDigits(length) {
+    let result = "";
+    for (let i = 0; i < length; i++) {
+        result += Math.floor(Math.random() * 10);
+    }
+    return result;
+}
+
+function generate() {
+    let institution = document.getElementById("institution").value;
+
+    // Always 5-digit transit
+    document.getElementById("transit").value = randomDigits(5);
+
+    // Account length based on bank
+    if (institution === "002") {
+        document.getElementById("account").value = randomDigits(7);
+    } else if (institution === "614") {
+        document.getElementById("account").value = randomDigits(10);
+    } else {
+        document.getElementById("account").value = randomDigits(7);
+    }
+
+    document.getElementById("result").innerHTML = "";
+}
+
+function validate() {
+    let institution = document.getElementById("institution").value;
+    let transit = document.getElementById("transit").value;
+    let account = document.getElementById("account").value;
+    let resultDiv = document.getElementById("result");
+
+    let transitValid = /^[0-9]{5}$/.test(transit);
+
+    let accountRule = rules[institution].account;
+    let accountValid;
+
+    if (Array.isArray(accountRule)) {
+        accountValid = accountRule.some(r => r.test(account));
+    } else {
+        accountValid = accountRule.test(account);
+    }
+
+    if (transitValid && accountValid) {
+        resultDiv.innerHTML = "Valid Format ✅";
+        resultDiv.className = "result success";
+    } else {
+        resultDiv.innerHTML = "Invalid Format ❌";
+        resultDiv.className = "result error";
+    }
+}
+
+</script>
+
+</body>
+</html>
